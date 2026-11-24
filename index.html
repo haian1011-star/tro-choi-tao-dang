@@ -171,7 +171,7 @@ const SAMPLE = [
   {q:'Kết quả phân tích đa thức x² + 2x + 1 thành nhân tử là:', o:['x(x − 1)','(x − 1)²','x(x + 1)','(x + 1)²'], c:3},
   {q:'Phân tích đa thức 4x² − 9 thành nhân tử ta được kết quả là:', o:['(2x − 3)(2x + 3)','(4x − 3)(4x + 3)','(2x² − 3)(2x² + 3)','(4x² − 3)(4x² + 3)'], c:0},
   {q:'Tính nhanh giá trị của biểu thức 101² bằng:', o:['202','401','10201','1201'], c:2},
-  {q:'Phân tích đa thức x² − 9x + 8 thành nhân tử ta được kết quả là:', o:['(x − 1)(x + 8)','(x − 2)(x − 4)','(x − 1)(x − 8)','(x + 1)(x − 8)'], c:2},
+  {q:'Phân tích đa thức x² − 9x + 8 thành nhân tử ta được kết quả là:', o:['(x − 1)(x + 8)','(x − 2)(x − 4)','(x − 1)(x − 8)','(x − 2)(x + 4)'], c:2},
 ];
 
 const $ = id => document.getElementById(id);
@@ -179,7 +179,7 @@ const esc = s => String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>
 const load = k => { try { return JSON.parse(localStorage.getItem(k)); } catch(e) { return null; } };
 const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} };
 
-let questions = load('tdq_questions_v2') || structuredClone(SAMPLE);
+let questions = load('tdq_questions_v3') || structuredClone(SAMPLE);
 let board = load('tdq_board') || [];
 let players = [], phase = 'setup', qi = 0, qStart = 0, cdStart = 0, lastSec = -1;
 
@@ -210,15 +210,15 @@ $('qList').addEventListener('input', e=>{
   if (d.q !== undefined) questions[+d.q].q = t.value;
   else if (d.o !== undefined) questions[+d.o].o[+d.j] = t.value;
   else if (d.c !== undefined) questions[+d.c].c = +t.value;
-  save('tdq_questions_v2', questions);
+  save('tdq_questions_v3', questions);
 });
 $('qList').addEventListener('click', e=>{
   const d = e.target.dataset.del;
   if (d === undefined || questions.length <= 1) return;
-  questions.splice(+d,1); save('tdq_questions_v2',questions); renderEditor();
+  questions.splice(+d,1); save('tdq_questions_v3',questions); renderEditor();
 });
-$('addQ').onclick = ()=>{ questions.push({q:'',o:['','','',''],c:0}); save('tdq_questions_v2',questions); renderEditor(); };
-$('resetQ').onclick = ()=>{ questions = structuredClone(SAMPLE); save('tdq_questions_v2',questions); renderEditor(); };
+$('addQ').onclick = ()=>{ questions.push({q:'',o:['','','',''],c:0}); save('tdq_questions_v3',questions); renderEditor(); };
+$('resetQ').onclick = ()=>{ questions = structuredClone(SAMPLE); save('tdq_questions_v3',questions); renderEditor(); };
 renderEditor();
 
 // ===== ÂM THANH =====
