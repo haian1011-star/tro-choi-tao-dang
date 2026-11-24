@@ -36,6 +36,8 @@ h2{font-size:24px;margin:28px 0 12px}
 .opt b{flex:none;width:34px;height:34px;border-radius:8px;display:grid;place-items:center}
 .opt input[type=radio]{width:22px;height:22px;flex:none;accent-color:#fff}
 .hint{font-size:14px;color:var(--mute)}
+.chk{display:flex;gap:10px;align-items:center;font-weight:600;cursor:pointer;min-height:44px}
+.chk input{width:22px;height:22px;accent-color:#fff;flex:none}
 .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 .poses{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .pcard{border-radius:14px;padding:12px;text-align:center;font-weight:700}
@@ -94,15 +96,19 @@ h2{font-size:24px;margin:28px 0 12px}
 <!-- ============ MÀN HÌNH CHUẨN BỊ ============ -->
 <section id="setup" class="screen on"><div class="wrap">
   <h1>Tạo dáng chọn đáp án</h1>
-  <p class="lead">Mỗi lượt 3 học sinh đứng trước webcam theo 3 khung trái – giữa – phải. Giữ tư thế khoảng 1 giây để chốt đáp án, mỗi câu có 10 giây.</p>
+  <p class="lead">Mỗi lượt 3 nhóm, mỗi nhóm cử 1 bạn đứng trước webcam theo 3 khung trái – giữa – phải. Giữ tư thế khoảng 1 giây để chốt đáp án, mỗi câu có 30 giây.</p>
 
   <div class="poses" id="poseGuide"></div>
 
-  <h2>Tên 3 học sinh lượt này</h2>
+  <h2>Tên 3 nhóm lượt này</h2>
   <div class="names">
-    <div><label for="n1" style="color:var(--p1)">Khung trái</label><input id="n1" placeholder="Học sinh 1"></div>
-    <div><label for="n2" style="color:var(--p2)">Khung giữa</label><input id="n2" placeholder="Học sinh 2"></div>
-    <div><label for="n3" style="color:var(--p3)">Khung phải</label><input id="n3" placeholder="Học sinh 3"></div>
+    <div><label for="n1" style="color:var(--p1)">Khung trái</label><input id="n1" placeholder="Nhóm 1"></div>
+    <div><label for="n2" style="color:var(--p2)">Khung giữa</label><input id="n2" placeholder="Nhóm 2"></div>
+    <div><label for="n3" style="color:var(--p3)">Khung phải</label><input id="n3" placeholder="Nhóm 3"></div>
+  </div>
+  <div class="row" style="margin-top:16px">
+    <label class="chk"><input type="checkbox" id="shufA" checked> Đảo vị trí đáp án mỗi lượt</label>
+    <label class="chk"><input type="checkbox" id="shufQ"> Đảo thứ tự câu hỏi mỗi lượt</label>
   </div>
   <div class="row" style="margin-top:20px">
     <button class="btn big" id="goBtn">Vào sân chơi ▶</button>
@@ -124,7 +130,7 @@ h2{font-size:24px;margin:28px 0 12px}
   <div class="qbar">
     <div class="qnum" id="qNum">Khởi động</div>
     <div class="qtext" id="qText">Các bạn đứng vào khung của mình và thử tạo dáng!</div>
-    <div class="timer"><svg viewBox="0 0 42 42"><circle cx="21" cy="21" r="18" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="5"/><circle id="tArc" cx="21" cy="21" r="18" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-dasharray="113.1" stroke-dashoffset="0"/></svg><span id="tNum">10</span></div>
+    <div class="timer"><svg viewBox="0 0 42 42"><circle cx="21" cy="21" r="18" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="5"/><circle id="tArc" cx="21" cy="21" r="18" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-dasharray="113.1" stroke-dashoffset="0"/></svg><span id="tNum">30</span></div>
   </div>
   <div class="stage">
     <canvas id="cv"></canvas>
@@ -149,7 +155,7 @@ h2{font-size:24px;margin:28px 0 12px}
       <p class="hint" id="lbEmpty"></p></div>
   </div>
   <div class="row" style="margin-top:28px">
-    <button class="btn big" id="newTurn">Lượt mới (3 bạn khác)</button>
+    <button class="btn big" id="newTurn">Lượt mới (3 nhóm khác)</button>
     <button class="btn2" id="clearLb">Xoá bảng xếp hạng</button>
   </div>
 </div></section>
@@ -159,7 +165,7 @@ h2{font-size:24px;margin:28px 0 12px}
 <script type="module">
 {
 // ===== CẤU HÌNH =====
-const QTIME = 10;      // giây cho mỗi câu
+const QTIME = 30;      // giây cho mỗi câu
 const HOLD = 900;      // ms giữ tư thế để chốt đáp án
 const ANS = ['A','B','C','D'];
 const ACOL = ['var(--A)','var(--B)','var(--C)','var(--D)'];
@@ -181,7 +187,7 @@ const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catc
 
 let questions = load('tdq_questions_v3') || structuredClone(SAMPLE);
 let board = load('tdq_board') || [];
-let players = [], phase = 'setup', qi = 0, qStart = 0, cdStart = 0, lastSec = -1;
+let round = [], players = [], phase = 'setup', qi = 0, qStart = 0, cdStart = 0, lastSec = -1;
 
 // ===== HÌNH NGƯỜI MINH HOẠ TƯ THẾ (khung hình soi gương: tay trái ở bên trái màn hình) =====
 function fig(t){
@@ -220,6 +226,7 @@ $('qList').addEventListener('click', e=>{
 $('addQ').onclick = ()=>{ questions.push({q:'',o:['','','',''],c:0}); save('tdq_questions_v3',questions); renderEditor(); };
 $('resetQ').onclick = ()=>{ questions = structuredClone(SAMPLE); save('tdq_questions_v3',questions); renderEditor(); };
 renderEditor();
+{ const o = load('tdq_opts'); if (o) { $('shufA').checked = !!o.a; $('shufQ').checked = !!o.q; } }
 
 // ===== ÂM THANH =====
 let ac = null;
@@ -241,7 +248,15 @@ $('goBtn').onclick = async ()=>{
   if (bad >= 0) { $('err').textContent = `Câu ${bad+1} còn để trống nội dung.`; return; }
   $('err').textContent = '';
   if (!ac) { try { ac = new AudioContext(); } catch(e) {} }
-  players = [1,2,3].map((n,i)=>({name: $('n'+n).value.trim() || 'Học sinh '+n, score:0, correct:0, ans:null, ansT:0, pts:0, cand:null, since:0, pose:null, seen:false}));
+  players = [1,2,3].map((n,i)=>({name: $('n'+n).value.trim() || 'Nhóm '+n, score:0, correct:0, ans:null, ansT:0, pts:0, cand:null, since:0, pose:null, seen:false}));
+  // Tạo bộ câu hỏi cho lượt này: đảo đáp án / đảo câu (nếu chọn)
+  const mix = a => { a = [...a]; for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; };
+  round = questions.map(q=>{
+    const perm = $('shufA').checked ? mix([0,1,2,3]) : [0,1,2,3];
+    return {q:q.q, o:perm.map(j=>q.o[j]), c:perm.indexOf(q.c)};
+  });
+  if ($('shufQ').checked) round = mix(round);
+  save('tdq_opts', {a:$('shufA').checked, q:$('shufQ').checked});
   phase = 'lobby'; qi = 0;
   buildZones(); renderAnswers(); setLobbyText();
   $('nextBtn').textContent = 'Bắt đầu ▶';
@@ -368,16 +383,16 @@ function buildZones(){
 function next(){
   if (phase === 'lobby') { phase = 'count'; cdStart = performance.now(); $('nextBtn').style.visibility='hidden'; }
   else if (phase === 'reveal') {
-    if (qi < questions.length - 1) { qi++; startQuestion(); }
+    if (qi < round.length - 1) { qi++; startQuestion(); }
     else finish();
   }
 }
 $('nextBtn').onclick = next;
 
 function startQuestion(){
-  const q = questions[qi];
+  const q = round[qi];
   players.forEach(p=>{ p.ans=null; p.pts=0; p.cand=null; });
-  $('qNum').textContent = `Câu ${qi+1}/${questions.length}`;
+  $('qNum').textContent = `Câu ${qi+1}/${round.length}`;
   $('qText').textContent = q.q;
   renderAnswers(q);
   hideOverlay();
@@ -402,14 +417,14 @@ function tick(now){
 
 function reveal(){
   phase = 'reveal';
-  const c = questions[qi].c; let anyOk = false;
+  const c = round[qi].c; let anyOk = false;
   players.forEach(p=>{
     if (p.ans === c) { p.pts = 100 + Math.round(50 * Math.max(0, (QTIME - p.ansT)/QTIME)); p.score += p.pts; p.correct++; anyOk = true; }
   });
   anyOk ? sOk() : sNo();
   ANS.forEach((a,i)=>{ $('ans'+i).classList.toggle('win', i===c); $('ans'+i).classList.toggle('dim', i!==c); });
   $('tNum').textContent = '✓';
-  $('nextBtn').textContent = qi < questions.length-1 ? 'Câu tiếp theo ▶' : 'Xem kết quả ▶';
+  $('nextBtn').textContent = qi < round.length-1 ? 'Câu tiếp theo ▶' : 'Xem kết quả ▶';
   $('nextBtn').style.visibility = 'visible';
 }
 
@@ -418,7 +433,7 @@ function renderZones(now){
     const el = $('zt'+i); if (!el) return;
     let html = '', cls = 'zstat', bar = 0;
     if (phase === 'reveal') {
-      const c = questions[qi].c;
+      const c = round[qi].c;
       if (p.ans === null) { html = 'Hết giờ'; cls += ' no'; }
       else if (p.ans === c) { html = `${ANS[p.ans]} ✓ +${p.pts}`; cls += ' ok'; }
       else { html = `${ANS[p.ans]} ✗`; cls += ' no'; }
@@ -452,7 +467,7 @@ document.addEventListener('keydown', e=>{
 function finish(){
   phase = 'end';
   const date = new Date().toLocaleDateString('vi-VN');
-  players.forEach(p=> board.push({name:p.name, score:p.score, correct:p.correct, total:questions.length, date}));
+  players.forEach(p=> board.push({name:p.name, score:p.score, correct:p.correct, total:round.length, date}));
   save('tdq_board', board);
   renderEnd(); show('end');
   sOk();
