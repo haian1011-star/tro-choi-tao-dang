@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#1b1240;--bg2:#2a1d5e;--ink:#fff;--mute:#c9c2ee;--line:rgba(255,255,255,.14);
---A:#e5484d;--B:#3e63dd;--C:#e8a800;--D:#2f9e44;--p1:#ff6fb5;--p2:#3ee0c4;--p3:#b49cff}
+--A:#e5484d;--B:#3e63dd;--C:#e8a800;--D:#2f9e44;--p1:#ff6fb5;--p2:#3ee0c4;--p3:#b49cff;--p4:#ffb347}
 *{box-sizing:border-box;min-width:0}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 "Be Vietnam Pro",system-ui,sans-serif}
@@ -26,7 +26,9 @@ h2{font-size:24px;margin:28px 0 12px}
 .wrap{max-width:1100px;margin:0 auto;padding:32px max(4vw,16px);width:100%}
 .lead{color:var(--mute);margin:0 0 20px}
 /* setup */
-.names{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.names{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.sel{display:flex;gap:10px;align-items:center;font-weight:700}
+.sel select{font:inherit;font-size:16px;color:var(--ink);background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-height:44px}
 .names label{display:block;font-weight:700;margin-bottom:6px}
 .qcard{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
 .qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:700}
@@ -96,15 +98,18 @@ h2{font-size:24px;margin:28px 0 12px}
 <!-- ============ MÀN HÌNH CHUẨN BỊ ============ -->
 <section id="setup" class="screen on"><div class="wrap">
   <h1>Tạo dáng chọn đáp án</h1>
-  <p class="lead">Mỗi lượt 3 nhóm, mỗi nhóm cử 1 bạn đứng trước webcam theo 3 khung trái – giữa – phải. Giữ tư thế khoảng 1 giây để chốt đáp án, mỗi câu có 30 giây.</p>
+  <p class="lead">Mỗi lượt 3 hoặc 4 nhóm, mỗi nhóm cử 1 bạn đứng trước webcam, mỗi bạn một khung từ trái sang phải. Giữ tư thế khoảng 1 giây để chốt đáp án, mỗi câu có 30 giây.</p>
 
   <div class="poses" id="poseGuide"></div>
 
-  <h2>Tên 3 nhóm lượt này</h2>
+  <h2>Các nhóm lượt này</h2>
+  <label class="sel" style="margin-bottom:14px">Số nhóm:
+    <select id="nGroups"><option value="3">3 nhóm</option><option value="4" selected>4 nhóm</option></select></label>
   <div class="names">
-    <div><label for="n1" style="color:var(--p1)">Khung trái</label><input id="n1" placeholder="Nhóm 1"></div>
-    <div><label for="n2" style="color:var(--p2)">Khung giữa</label><input id="n2" placeholder="Nhóm 2"></div>
-    <div><label for="n3" style="color:var(--p3)">Khung phải</label><input id="n3" placeholder="Nhóm 3"></div>
+    <div><label for="n1" style="color:var(--p1)">Khung 1 (ngoài cùng bên trái)</label><input id="n1" placeholder="Nhóm 1"></div>
+    <div><label for="n2" style="color:var(--p2)">Khung 2</label><input id="n2" placeholder="Nhóm 2"></div>
+    <div><label for="n3" style="color:var(--p3)">Khung 3</label><input id="n3" placeholder="Nhóm 3"></div>
+    <div id="g4"><label for="n4" style="color:var(--p4)">Khung 4 (ngoài cùng bên phải)</label><input id="n4" placeholder="Nhóm 4"></div>
   </div>
   <div class="row" style="margin-top:16px">
     <label class="chk"><input type="checkbox" id="shufA" checked> Đảo vị trí đáp án mỗi lượt</label>
@@ -139,7 +144,7 @@ h2{font-size:24px;margin:28px 0 12px}
   </div>
   <div class="answers" id="answers"></div>
   <div class="ctrl">
-    <span class="hint" style="margin-right:auto;align-self:center">Phím Space: tiếp tục · Thử không cần camera: Q W E R / A S D F / Z X C V</span>
+    <span class="hint" style="margin-right:auto;align-self:center">Phím Space: tiếp tục · Thử không cần camera: Q W E R / A S D F / Z X C V / U I O P</span>
     <button class="btn2" id="fsBtn">Toàn màn hình</button>
     <button class="btn2" id="quitBtn">Thoát</button>
     <button class="btn" id="nextBtn">Bắt đầu ▶</button>
@@ -155,7 +160,7 @@ h2{font-size:24px;margin:28px 0 12px}
       <p class="hint" id="lbEmpty"></p></div>
   </div>
   <div class="row" style="margin-top:28px">
-    <button class="btn big" id="newTurn">Lượt mới (3 nhóm khác)</button>
+    <button class="btn big" id="newTurn">Lượt mới</button>
     <button class="btn2" id="clearLb">Xoá bảng xếp hạng</button>
   </div>
 </div></section>
@@ -169,7 +174,7 @@ const QTIME = 30;      // giây cho mỗi câu
 const HOLD = 900;      // ms giữ tư thế để chốt đáp án
 const ANS = ['A','B','C','D'];
 const ACOL = ['var(--A)','var(--B)','var(--C)','var(--D)'];
-const PCOL = ['#ff6fb5','#3ee0c4','#b49cff'];
+const PCOL = ['#ff6fb5','#3ee0c4','#b49cff','#ffb347'];
 const POSE = ['Giơ tay trái','Giơ tay phải','Giơ cả hai tay','Dang ngang hai tay'];
 const SAMPLE = [
   {q:'Kết quả phân tích đa thức x² + 2x thành nhân tử là:', o:['x(x + 2)','x(x² + 2)','x(x − 2)','x(x² − 2)'], c:0},
@@ -226,7 +231,9 @@ $('qList').addEventListener('click', e=>{
 $('addQ').onclick = ()=>{ questions.push({q:'',o:['','','',''],c:0}); save('tdq_questions_v3',questions); renderEditor(); };
 $('resetQ').onclick = ()=>{ questions = structuredClone(SAMPLE); save('tdq_questions_v3',questions); renderEditor(); };
 renderEditor();
-{ const o = load('tdq_opts'); if (o) { $('shufA').checked = !!o.a; $('shufQ').checked = !!o.q; } }
+{ const o = load('tdq_opts'); if (o) { $('shufA').checked = !!o.a; $('shufQ').checked = !!o.q; if (o.n) $('nGroups').value = o.n; } }
+const syncN = ()=>{ const four = $('nGroups').value === '4'; $('g4').style.display = four ? '' : 'none'; $('n3').previousElementSibling.textContent = four ? 'Khung 3' : 'Khung 3 (ngoài cùng bên phải)'; };
+$('nGroups').addEventListener('change', syncN); syncN();
 
 // ===== ÂM THANH =====
 let ac = null;
@@ -248,7 +255,8 @@ $('goBtn').onclick = async ()=>{
   if (bad >= 0) { $('err').textContent = `Câu ${bad+1} còn để trống nội dung.`; return; }
   $('err').textContent = '';
   if (!ac) { try { ac = new AudioContext(); } catch(e) {} }
-  players = [1,2,3].map((n,i)=>({name: $('n'+n).value.trim() || 'Nhóm '+n, score:0, correct:0, ans:null, ansT:0, pts:0, cand:null, since:0, pose:null, seen:false}));
+  const N = +$('nGroups').value;
+  players = [1,2,3,4].slice(0,N).map((n,i)=>({name: $('n'+n).value.trim() || 'Nhóm '+n, score:0, correct:0, ans:null, ansT:0, pts:0, cand:null, since:0, pose:null, seen:false}));
   // Tạo bộ câu hỏi cho lượt này: đảo đáp án / đảo câu (nếu chọn)
   const mix = a => { a = [...a]; for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; };
   round = questions.map(q=>{
@@ -256,7 +264,7 @@ $('goBtn').onclick = async ()=>{
     return {q:q.q, o:perm.map(j=>q.o[j]), c:perm.indexOf(q.c)};
   });
   if ($('shufQ').checked) round = mix(round);
-  save('tdq_opts', {a:$('shufA').checked, q:$('shufQ').checked});
+  save('tdq_opts', {a:$('shufA').checked, q:$('shufQ').checked, n:+$('nGroups').value});
   phase = 'lobby'; qi = 0;
   buildZones(); renderAnswers(); setLobbyText();
   $('nextBtn').textContent = 'Bắt đầu ▶';
@@ -266,7 +274,7 @@ $('goBtn').onclick = async ()=>{
 $('lbBtn').onclick = ()=>{ players = []; renderEnd(); show('end'); };
 $('quitBtn').onclick = ()=>{ phase = 'setup'; show('setup'); };
 $('fsBtn').onclick = ()=>{ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); };
-$('newTurn').onclick = ()=>{ ['n1','n2','n3'].forEach(id=>$(id).value=''); show('setup'); $('n1').focus(); };
+$('newTurn').onclick = ()=>{ ['n1','n2','n3','n4'].forEach(id=>$(id).value=''); show('setup'); $('n1').focus(); };
 $('clearLb').onclick = ()=>{ if (confirm('Xoá toàn bộ bảng xếp hạng chung?')) { board = []; save('tdq_board',board); renderEnd(); } };
 
 // ===== CAMERA + MEDIAPIPE POSE =====
@@ -288,7 +296,7 @@ async function startCamera(){
     try {
       const {PoseLandmarker, FilesetResolver} = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs');
       const fs = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
-      const opt = d => ({baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task', delegate:d}, runningMode:'VIDEO', numPoses:3, minPoseDetectionConfidence:.5, minTrackingConfidence:.5});
+      const opt = d => ({baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task', delegate:d}, runningMode:'VIDEO', numPoses:4, minPoseDetectionConfidence:.5, minTrackingConfidence:.5});
       try { landmarker = await PoseLandmarker.createFromOptions(fs, opt('GPU')); }
       catch(e) { landmarker = await PoseLandmarker.createFromOptions(fs, opt('CPU')); }
     } catch(e) {
@@ -339,11 +347,12 @@ function loop(){
       try { lastRes = landmarker.detectForVideo(video, now); } catch(e) {}
     }
     // Gán mỗi người vào khung trái / giữa / phải theo vị trí giữa hai vai
-    const zone = [null,null,null];
+    const N = players.length || 3;
+    const zone = Array(N).fill(null);
     for (const lm of (lastRes?.landmarks || [])) {
       const cx = 1 - (lm[11].x + lm[12].x)/2;
-      const z = Math.min(2, Math.max(0, Math.floor(cx*3)));
-      const d = Math.abs(cx - (z+.5)/3);
+      const z = Math.min(N-1, Math.max(0, Math.floor(cx*N)));
+      const d = Math.abs(cx - (z+.5)/N);
       if (!zone[z] || d < zone[z].d) zone[z] = {lm, d};
     }
     zone.forEach((o,i)=>{ if (o) drawSkel(o.lm, PCOL[i]); });
@@ -376,6 +385,7 @@ function renderAnswers(q){
   $('answers').innerHTML = ANS.map((a,i)=>`<div class="ans" id="ans${i}" style="background:${ACOL[i]}">${fig(i)}<div><div class="t"><span class="l">${a}.</span> ${q ? esc(q.o[i]) : ''}</div><div class="p">${POSE[i]}</div></div></div>`).join('');
 }
 function buildZones(){
+  $('zones').style.gridTemplateColumns = `repeat(${players.length},1fr)`;
   $('zones').innerHTML = players.map((p,i)=>`<div class="zone"><div class="ztop" style="border-color:${PCOL[i]}"><span class="zname">${esc(p.name)}</span><span class="zscore" id="zs${i}">0</span></div><div class="zstat" id="zt${i}"></div></div>`).join('');
   players.forEach(p=>p._h='');
 }
@@ -455,12 +465,12 @@ function renderZones(now){
 }
 
 // Bàn phím: Space = tiếp tục; chơi thử không camera
-const KEYS = ['qwer','asdf','zxcv'];
+const KEYS = ['qwer','asdf','zxcv','uiop'];
 document.addEventListener('keydown', e=>{
   if (!$('game').classList.contains('on')) return;
   if (e.code === 'Space') { e.preventDefault(); if ($('nextBtn').style.visibility !== 'hidden') next(); return; }
   const k = e.key.toLowerCase();
-  KEYS.forEach((s,i)=>{ const a = s.indexOf(k); if (a >= 0 && phase === 'question' && players[i].ans === null) lock(i, a, performance.now()); });
+  KEYS.forEach((s,i)=>{ const a = s.indexOf(k); if (a >= 0 && phase === 'question' && players[i] && players[i].ans === null) lock(i, a, performance.now()); });
 });
 
 // ===== KẾT THÚC & BẢNG XẾP HẠNG =====
