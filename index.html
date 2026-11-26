@@ -98,17 +98,17 @@ h2{font-size:24px;margin:28px 0 12px}
 <!-- ============ MÀN HÌNH CHUẨN BỊ ============ -->
 <section id="setup" class="screen on"><div class="wrap">
   <h1>Tạo dáng chọn đáp án</h1>
-  <p class="lead">Mỗi lượt 3 hoặc 4 nhóm, mỗi nhóm cử 1 bạn đứng trước webcam, mỗi bạn một khung từ trái sang phải. Giữ tư thế khoảng 1 giây để chốt đáp án, mỗi câu có 30 giây.</p>
+  <p class="lead">Mỗi lượt 2, 3 hoặc 4 nhóm, mỗi nhóm cử 1 bạn đứng trước webcam, mỗi bạn một khung từ trái sang phải. Giữ tư thế khoảng 1 giây để chốt đáp án, mỗi câu có 30 giây.</p>
 
   <div class="poses" id="poseGuide"></div>
 
   <h2>Các nhóm lượt này</h2>
   <label class="sel" style="margin-bottom:14px">Số nhóm:
-    <select id="nGroups"><option value="3">3 nhóm</option><option value="4" selected>4 nhóm</option></select></label>
+    <select id="nGroups"><option value="2">2 nhóm</option><option value="3">3 nhóm</option><option value="4" selected>4 nhóm</option></select></label>
   <div class="names">
     <div><label for="n1" style="color:var(--p1)">Khung 1 (ngoài cùng bên trái)</label><input id="n1" placeholder="Nhóm 1"></div>
     <div><label for="n2" style="color:var(--p2)">Khung 2</label><input id="n2" placeholder="Nhóm 2"></div>
-    <div><label for="n3" style="color:var(--p3)">Khung 3</label><input id="n3" placeholder="Nhóm 3"></div>
+    <div id="g3"><label for="n3" style="color:var(--p3)">Khung 3</label><input id="n3" placeholder="Nhóm 3"></div>
     <div id="g4"><label for="n4" style="color:var(--p4)">Khung 4 (ngoài cùng bên phải)</label><input id="n4" placeholder="Nhóm 4"></div>
   </div>
   <div class="row" style="margin-top:16px">
@@ -232,7 +232,9 @@ $('addQ').onclick = ()=>{ questions.push({q:'',o:['','','',''],c:0}); save('tdq_
 $('resetQ').onclick = ()=>{ questions = structuredClone(SAMPLE); save('tdq_questions_v3',questions); renderEditor(); };
 renderEditor();
 { const o = load('tdq_opts'); if (o) { $('shufA').checked = !!o.a; $('shufQ').checked = !!o.q; if (o.n) $('nGroups').value = o.n; } }
-const syncN = ()=>{ const four = $('nGroups').value === '4'; $('g4').style.display = four ? '' : 'none'; $('n3').previousElementSibling.textContent = four ? 'Khung 3' : 'Khung 3 (ngoài cùng bên phải)'; };
+const syncN = ()=>{ const N = +$('nGroups').value; $('g3').style.display = N >= 3 ? '' : 'none'; $('g4').style.display = N >= 4 ? '' : 'none';
+  $('n2').previousElementSibling.textContent = N === 2 ? 'Khung 2 (bên phải)' : 'Khung 2';
+  $('n3').previousElementSibling.textContent = N === 3 ? 'Khung 3 (ngoài cùng bên phải)' : 'Khung 3'; };
 $('nGroups').addEventListener('change', syncN); syncN();
 
 // ===== ÂM THANH =====
